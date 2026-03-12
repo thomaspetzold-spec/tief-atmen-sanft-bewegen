@@ -20,7 +20,7 @@ if (import.meta.env.DEV) {
 }
 
 initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY),
+  provider: new ReCaptchaV3Provider('6LcoI4gsAAAAAKZ2PpVq-haUy8bcL1lr3PGzsd0F'),
   isTokenAutoRefreshEnabled: true,
 });
 
