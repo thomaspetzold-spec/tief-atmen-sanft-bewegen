@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 45 30% 97%;
+    --foreground: 25 20% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 20% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 20% 15%;
+    --primary: 155 35% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 45 25% 90%;
+    --secondary-foreground: 25 20% 25%;
+    --muted: 45 20% 93%;
+    --muted-foreground: 25 15% 50%;
+    --accent: 35 60% 65%;
+    --accent-foreground: 25 20% 15%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 45 20% 88%;
+    --input: 45 20% 88%;
+    --ring: 155 35% 40%;
+    --radius: 1rem;
+    --sidebar-background: 45 30% 97%;
+    --sidebar-foreground: 25 20% 15%;
+    --sidebar-primary: 155 35% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 45 25% 90%;
+    --sidebar-accent-foreground: 25 20% 25%;
+    --sidebar-border: 45 20% 88%;
+    --sidebar-ring: 155 35% 40%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+}
+
+@layer components {
+  .gradient-hero {
+    background: linear-gradient(
+      135deg,
+      hsl(45, 40%, 95%) 0%,
+      hsl(120, 25%, 92%) 50%,
+      hsl(155, 30%, 90%) 100%
+    );
+    min-height: 100vh;
+  }
+
+  .yoga-card {
+    @apply bg-card rounded-2xl p-5 shadow-soft border border-border/40;
+  }
+
+  .shadow-soft {
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+  }
+
+  .slot-badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+
+  .slot-available {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .slot-limited {
+    @apply bg-amber-100 text-amber-700;
+  }
+
+  .slot-full {
+    @apply bg-destructive/10 text-destructive;
+  }
+}
+
+@layer utilities {
+  .shadow-soft {
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+  }
+}
