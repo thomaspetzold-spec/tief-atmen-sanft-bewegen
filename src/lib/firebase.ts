@@ -1,7 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
-// App Check wird nach Vercel-Deployment aktiviert
-// import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAq4j6IKFevjM8xmluUFf4I756f9S9Br2w",
@@ -15,5 +14,14 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
+if (import.meta.env.DEV) {
+  // @ts-expect-error - Firebase debug token for local development
+  self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}
+
+initializeAppCheck(app, {
+  provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY),
+  isTokenAutoRefreshEnabled: true,
+});
 
 export const db = getDatabase(app); 
