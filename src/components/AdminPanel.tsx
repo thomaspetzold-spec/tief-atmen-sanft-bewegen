@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Settings, Home, Trees, Lock } from 'lucide-react';
-import { YogaSession, formatDate, formatTime, updateSessionLocation, getLocationLabel, LocationType, getCapacity, saveCapacity, resetAttendance } from '@/lib/yogaStore';
+import { YogaSession, AttendanceRecord, formatDate, formatTime, updateSessionLocation, getLocationLabel, LocationType, getCapacity, saveCapacity, resetAttendance, removeAttendee, getAttendance } from '@/lib/yogaStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -19,13 +19,19 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
   const [password, setPassword] = useState('');
   const [indoorMax, setIndoorMax] = useState('6');
   const [outdoorMax, setOutdoorMax] = useState('15');
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
 
-  useEffect(() => {
+  const loadAdminData = () => {
     getCapacity().then(c => {
       setIndoorMax(String(c.indoor));
       setOutdoorMax(String(c.outdoor));
     });
-  }, []);
+    getAttendance().then(setAttendance);
+  };
+
+  useEffect(() => {
+    if (authenticated) loadAdminData();
+  }, [authenticated]);
 
   const handleToggleLocation = async (session: YogaSession) => {
     const newType: LocationType = session.locationType === 'indoor' ? 'outdoor' : 'indoor';
@@ -37,8 +43,16 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
   const handleResetLeaderboard = async () => {
     if (!confirm('Rangliste wirklich zurücksetzen? Das kann nicht rückgängig gemacht werden.')) return;
     await resetAttendance();
+    setAttendance([]);
     onUpdate();
     toast({ title: 'Rangliste zurückgesetzt', description: 'Alle Teilnahmen wurden gelöscht' });
+  };
+
+  const handleRemoveAttendee = async (name: string) => {
+    await removeAttendee(name);
+    setAttendance(prev => prev.filter(a => a.name !== name));
+    onUpdate();
+    toast({ title: `${name} entfernt` });
   };
 
   const handleSaveCapacity = async () => {
@@ -112,10 +126,25 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
         <Button size="sm" onClick={handleSaveCapacity} className="w-full mt-1">Speichern</Button>
       </div>
 
-      {/* Reset leaderboard */}
-      <div className="mb-4">
-        <Button variant="destructive" size="sm" onClick={handleResetLeaderboard} className="w-full">
-          Rangliste zurücksetzen
+      {/* Leaderboard management */}
+      <div className="mb-4 p-3 bg-muted/50 rounded-xl space-y-2">
+        <p className="text-xs font-medium text-muted-foreground mb-2">Rangliste</p>
+        {attendance.filter(a => a.sessions > 0).sort((a, b) => b.sessions - a.sessions).map(record => (
+          <div key={record.name} className="flex items-center justify-between text-sm py-1 px-2 rounded-lg bg-background/50">
+            <span>{record.name} <span className="text-muted-foreground text-xs">({record.sessions}x)</span></span>
+            <button
+              onClick={() => handleRemoveAttendee(record.name)}
+              className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+            >
+              Entfernen
+            </button>
+          </div>
+        ))}
+        {attendance.filter(a => a.sessions > 0).length === 0 && (
+          <p className="text-xs text-muted-foreground">Keine Einträge</p>
+        )}
+        <Button variant="destructive" size="sm" onClick={handleResetLeaderboard} className="w-full mt-2">
+          Alle zurücksetzen
         </Button>
       </div>
 

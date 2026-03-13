@@ -177,6 +177,12 @@ export const resetAttendance = async (): Promise<void> => {
   await set(ref(db, 'attendance'), []);
 };
 
+export const removeAttendee = async (name: string): Promise<void> => {
+  const attendance = await getAttendance();
+  const updated = attendance.filter(a => a.name !== name);
+  await saveAttendance(updated);
+};
+
 export const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
   return date.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' });
