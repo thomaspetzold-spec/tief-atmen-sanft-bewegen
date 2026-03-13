@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Settings, Home, Trees, Lock } from 'lucide-react';
-import { YogaSession, AttendanceRecord, formatDate, formatTime, updateSessionLocation, getLocationLabel, LocationType, getCapacity, saveCapacity, resetAttendance, removeAttendee, getAttendance } from '@/lib/yogaStore';
+import { Settings, Home, Trees, Lock, ChevronDown, ChevronUp } from 'lucide-react';
+import { YogaSession, AttendanceRecord, formatDate, formatTime, updateSessionLocation, getLocationLabel, LocationType, getCapacity, saveCapacity, resetAttendance, removeAttendee, getAttendance, cancelCheckIn } from '@/lib/yogaStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +18,7 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState<'teilnehmer' | 'rangliste'>('teilnehmer');
+  const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set());
   const [indoorMax, setIndoorMax] = useState('6');
   const [outdoorMax, setOutdoorMax] = useState('15');
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
@@ -47,6 +48,20 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
     setAttendance([]);
     onUpdate();
     toast({ title: 'Rangliste zurückgesetzt', description: 'Alle Teilnahmen wurden gelöscht' });
+  };
+
+  const toggleSession = (id: string) => {
+    setExpandedSessions(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const handleRemoveFromSession = async (sessionId: string, name: string) => {
+    await cancelCheckIn(sessionId, name);
+    onUpdate();
+    toast({ title: `${name} aus Session entfernt` });
   };
 
   const handleRemoveAttendee = async (name: string) => {
@@ -168,32 +183,57 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
       {/* Session list */}
       <ul className="space-y-2">
         {sessions.map((session) => (
-          <li key={session.id} className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-background/50">
-            <div>
-              <span className="font-medium">{formatDate(session.date)}</span>
-              <span className="text-sm text-muted-foreground ml-2">{formatTime(session.time)}</span>
-              <div className="text-xs text-muted-foreground">{session.attendees.length}/{session.maxSpots} angemeldet</div>
-            </div>
-            <div className="flex items-center bg-muted rounded-lg p-0.5 text-xs font-medium">
+          <li key={session.id} className="rounded-xl bg-background/50 overflow-hidden">
+            <div className="flex items-center justify-between py-2.5 px-3">
               <button
-                onClick={() => session.locationType !== 'indoor' && handleToggleLocation(session)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md transition-all ${
-                  session.locationType === 'indoor' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
-                }`}
+                onClick={() => toggleSession(session.id)}
+                className="flex items-center gap-1.5 text-left flex-1 min-w-0"
               >
-                <Home className="w-3.5 h-3.5" />
-                Drinnen
+                {expandedSessions.has(session.id) ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
+                <div>
+                  <span className="font-medium">{formatDate(session.date)}</span>
+                  <span className="text-sm text-muted-foreground ml-2">{formatTime(session.time)}</span>
+                  <div className="text-xs text-muted-foreground">{session.attendees.length}/{session.maxSpots} angemeldet</div>
+                </div>
               </button>
-              <button
-                onClick={() => session.locationType !== 'outdoor' && handleToggleLocation(session)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md transition-all ${
-                  session.locationType === 'outdoor' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Trees className="w-3.5 h-3.5" />
-                Draußen
-              </button>
+              <div className="flex items-center bg-muted rounded-lg p-0.5 text-xs font-medium ml-2 shrink-0">
+                <button
+                  onClick={() => session.locationType !== 'indoor' && handleToggleLocation(session)}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md transition-all ${
+                    session.locationType === 'indoor' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Home className="w-3.5 h-3.5" />
+                  Drinnen
+                </button>
+                <button
+                  onClick={() => session.locationType !== 'outdoor' && handleToggleLocation(session)}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md transition-all ${
+                    session.locationType === 'outdoor' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Trees className="w-3.5 h-3.5" />
+                  Draußen
+                </button>
+              </div>
             </div>
+            {expandedSessions.has(session.id) && (
+              <ul className="border-t border-border/50 px-3 py-2 space-y-1.5">
+                {session.attendees.length === 0 ? (
+                  <li className="text-xs text-muted-foreground py-1">Keine Anmeldungen</li>
+                ) : session.attendees.map((name) => (
+                  <li key={name} className="flex items-center justify-between text-sm py-1 px-2 rounded-lg bg-muted/50">
+                    <span>{name}</span>
+                    <button
+                      onClick={() => handleRemoveFromSession(session.id, name)}
+                      className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      Entfernen
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>
