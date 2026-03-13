@@ -125,10 +125,7 @@ const Index = () => {
               <>
                 {thisWeekSessions.length > 0 && (
                   <div className="space-y-4">
-                    <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide px-1 animate-fade-in">
-                      Jetzt buchbar
-                    </h2>
-                    {thisWeekSessions.map((session, i) => (
+{thisWeekSessions.map((session, i) => (
                       <div key={session.id} className="animate-fade-in" style={{ animationDelay: `${i * 0.08}s` }}>
                         <SessionCard session={session} onUpdate={loadData} />
                       </div>
