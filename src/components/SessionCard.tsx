@@ -107,7 +107,7 @@ export const SessionCard = ({ session, onUpdate, isPlaceholder = false }: Sessio
       {!isFull && (
         <div className="flex gap-2 mb-3">
           <Input
-            placeholder="Dein Name"
+            placeholder="Dein Vorname"
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCheckIn()}
