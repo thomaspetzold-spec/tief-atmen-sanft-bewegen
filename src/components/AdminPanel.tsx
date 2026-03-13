@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Settings, Home, Trees, Lock, ChevronDown, ChevronUp } from 'lucide-react';
-import { YogaSession, AttendanceRecord, formatDate, formatTime, updateSessionLocation, getLocationLabel, LocationType, getCapacity, saveCapacity, resetAttendance, removeAttendee, getAttendance, cancelCheckIn } from '@/lib/yogaStore';
+import { YogaSession, AttendanceRecord, formatDate, formatTime, updateSessionLocation, updateSessionTime, getLocationLabel, LocationType, getCapacity, saveCapacity, resetAttendance, removeAttendee, getAttendance, cancelCheckIn } from '@/lib/yogaStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -56,6 +56,12 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
+  };
+
+  const handleUpdateTime = async (sessionId: string, time: string) => {
+    await updateSessionTime(sessionId, time);
+    onUpdate();
+    toast({ title: 'Uhrzeit gespeichert' });
   };
 
   const handleRemoveFromSession = async (sessionId: string, name: string) => {
@@ -195,21 +201,34 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
                 </div>
               </div>
               {expandedSessions.has(session.id) && (
-                <ul className="border-t border-border/50 px-3 py-2 space-y-1.5">
+                <div className="border-t border-border/50 px-3 py-2 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground w-16">Uhrzeit</span>
+                    <Input
+                      type="time"
+                      defaultValue={session.time}
+                      onBlur={(e) => e.target.value !== session.time && handleUpdateTime(session.id, e.target.value)}
+                      className="h-8 text-sm w-32"
+                    />
+                  </div>
                   {session.attendees.length === 0 ? (
-                    <li className="text-xs text-muted-foreground py-1">Keine Anmeldungen</li>
-                  ) : session.attendees.map((name) => (
-                    <li key={name} className="flex items-center justify-between text-sm py-1 px-2 rounded-lg bg-muted/50">
-                      <span>{name}</span>
-                      <button
-                        onClick={() => handleRemoveFromSession(session.id, name)}
-                        className="text-xs text-muted-foreground hover:text-destructive transition-colors"
-                      >
-                        Entfernen
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                    <p className="text-xs text-muted-foreground py-1">Keine Anmeldungen</p>
+                  ) : (
+                    <ul className="space-y-1.5">
+                      {session.attendees.map((name) => (
+                        <li key={name} className="flex items-center justify-between text-sm py-1 px-2 rounded-lg bg-muted/50">
+                          <span>{name}</span>
+                          <button
+                            onClick={() => handleRemoveFromSession(session.id, name)}
+                            className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+                          >
+                            Entfernen
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               )}
             </li>
           ))}

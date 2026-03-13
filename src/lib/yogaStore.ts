@@ -173,6 +173,12 @@ export const cancelCheckIn = async (sessionId: string, name: string): Promise<{ 
   return { success: true, message: 'Dein Platz wurde freigegeben' };
 };
 
+export const updateSessionTime = async (sessionId: string, time: string): Promise<void> => {
+  const sessions = await getSessions();
+  const updated = sessions.map(s => s.id === sessionId ? { ...s, time } : s);
+  await saveSessions(updated);
+};
+
 export const resetAttendance = async (): Promise<void> => {
   await set(ref(db, 'attendance'), []);
 };
