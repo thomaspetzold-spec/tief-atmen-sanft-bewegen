@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Settings, Home, Trees, Lock, ChevronDown, ChevronUp } from 'lucide-react';
-import { YogaSession, AttendanceRecord, formatDate, formatTime, updateSessionLocation, updateSessionTime, getLocationLabel, LocationType, getCapacity, saveCapacity, resetAttendance, removeAttendee, getAttendance, cancelCheckIn } from '@/lib/yogaStore';
+import { YogaSession, AttendanceRecord, formatDate, formatTime, updateSessionLocation, updateSessionTime, toggleSessionCancelled, getLocationLabel, LocationType, getCapacity, saveCapacity, resetAttendance, removeAttendee, getAttendance, cancelCheckIn } from '@/lib/yogaStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -56,6 +56,12 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
+  };
+
+  const handleToggleCancelled = async (session: YogaSession) => {
+    const nowCancelled = await toggleSessionCancelled(session.id);
+    onUpdate();
+    toast({ title: nowCancelled ? 'Termin abgesagt' : 'Termin wieder aktiv' });
   };
 
   const handleUpdateTime = async (sessionId: string, time: string) => {
@@ -211,6 +217,14 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
                       className="h-8 text-sm w-32"
                     />
                   </div>
+                  <Button
+                    variant={session.cancelled ? 'default' : 'destructive'}
+                    size="sm"
+                    onClick={() => handleToggleCancelled(session)}
+                    className="w-full"
+                  >
+                    {session.cancelled ? 'Termin wieder aktivieren' : 'Kein Yoga diese Woche'}
+                  </Button>
                   {session.attendees.length === 0 ? (
                     <p className="text-xs text-muted-foreground py-1">Keine Anmeldungen</p>
                   ) : (

@@ -11,6 +11,7 @@ export interface YogaSession {
   locationType: LocationType;
   maxSpots: number;
   attendees: string[];
+  cancelled?: boolean;
 }
 
 export interface AttendanceRecord {
@@ -171,6 +172,16 @@ export const cancelCheckIn = async (sessionId: string, name: string): Promise<{ 
   await saveAttendance(attendance);
 
   return { success: true, message: 'Dein Platz wurde freigegeben' };
+};
+
+export const toggleSessionCancelled = async (sessionId: string): Promise<boolean> => {
+  const sessions = await getSessions();
+  const session = sessions.find(s => s.id === sessionId);
+  if (!session) return false;
+  const newCancelled = !session.cancelled;
+  const updated = sessions.map(s => s.id === sessionId ? { ...s, cancelled: newCancelled } : s);
+  await saveSessions(updated);
+  return newCancelled;
 };
 
 export const updateSessionTime = async (sessionId: string, time: string): Promise<void> => {

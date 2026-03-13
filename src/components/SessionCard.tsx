@@ -81,6 +81,30 @@ export const SessionCard = ({ session, onUpdate, isPlaceholder = false }: Sessio
     setIsLoading(false);
   };
 
+  if (session.cancelled) {
+    return (
+      <div className="yoga-card opacity-50">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-display text-xl font-semibold text-foreground line-through">{formatDate(session.date)}</h3>
+            <div className="flex items-center gap-2 text-muted-foreground mt-1 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-4 h-4" />
+                <span className="text-sm">{formatTime(session.time)}</span>
+              </div>
+              <span className="text-muted-foreground/40">·</span>
+              <div className="flex items-center gap-1.5">
+                <LocationIcon className="w-4 h-4" />
+                <span className="text-sm">{getLocationLabel(session.locationType)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground mt-3">nächste Woche wieder :)</p>
+      </div>
+    );
+  }
+
   return (
     <div className="yoga-card">
       <div className="flex justify-between items-start mb-3">
