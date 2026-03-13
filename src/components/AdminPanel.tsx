@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Settings, Home, Trees } from 'lucide-react';
+import { Settings, Home, Trees, Lock } from 'lucide-react';
 import { YogaSession, formatDate, formatTime, updateSessionLocation, getLocationLabel, LocationType, getCapacity, saveCapacity, resetAttendance } from '@/lib/yogaStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+
+const ADMIN_PASSWORD = 'schafi';
 
 interface AdminPanelProps {
   sessions: YogaSession[];
@@ -13,6 +15,8 @@ interface AdminPanelProps {
 
 export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => {
   const { toast } = useToast();
+  const [authenticated, setAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
   const [indoorMax, setIndoorMax] = useState('6');
   const [outdoorMax, setOutdoorMax] = useState('15');
 
@@ -46,6 +50,41 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
     onUpdate();
     toast({ title: 'Gespeichert', description: 'Maximale Teilnehmerzahl aktualisiert' });
   };
+
+  const handleLogin = () => {
+    if (password === ADMIN_PASSWORD) {
+      setAuthenticated(true);
+      setPassword('');
+    } else {
+      toast({ title: 'Falsches Passwort', variant: 'destructive' });
+      setPassword('');
+    }
+  };
+
+  if (!authenticated) {
+    return (
+      <div className="yoga-card">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Lock className="w-5 h-5 text-primary" />
+            <h2 className="font-display text-xl font-semibold">Admin-Bereich</h2>
+          </div>
+          <Button variant="ghost" size="sm" onClick={onClose}>Schließen</Button>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            type="password"
+            placeholder="Passwort"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+            className="flex-1"
+          />
+          <Button onClick={handleLogin}>Anmelden</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="yoga-card">
