@@ -17,6 +17,7 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
+  const [activeTab, setActiveTab] = useState<'teilnehmer' | 'rangliste'>('teilnehmer');
   const [indoorMax, setIndoorMax] = useState('6');
   const [outdoorMax, setOutdoorMax] = useState('15');
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
@@ -110,43 +111,59 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
         <Button variant="ghost" size="sm" onClick={onClose}>Schließen</Button>
       </div>
 
-      {/* Capacity settings */}
-      <div className="mb-4 p-3 bg-muted/50 rounded-xl space-y-2">
-        <p className="text-xs font-medium text-muted-foreground mb-3">Max. Teilnehmer</p>
-        <div className="flex items-center gap-2">
-          <Home className="w-4 h-4 text-muted-foreground shrink-0" />
-          <span className="text-sm w-16">Drinnen</span>
-          <Input type="number" min={1} value={indoorMax} onChange={(e) => setIndoorMax(e.target.value)} className="w-20 h-8 text-sm" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Trees className="w-4 h-4 text-muted-foreground shrink-0" />
-          <span className="text-sm w-16">Draußen</span>
-          <Input type="number" min={1} value={outdoorMax} onChange={(e) => setOutdoorMax(e.target.value)} className="w-20 h-8 text-sm" />
-        </div>
-        <Button size="sm" onClick={handleSaveCapacity} className="w-full mt-1">Speichern</Button>
+      {/* Tabs */}
+      <div className="flex bg-muted rounded-xl p-1 mb-4">
+        {(['teilnehmer', 'rangliste'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all capitalize ${
+              activeTab === tab ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {tab === 'teilnehmer' ? 'Teilnehmer' : 'Rangliste'}
+          </button>
+        ))}
       </div>
 
-      {/* Leaderboard management */}
-      <div className="mb-4 p-3 bg-muted/50 rounded-xl space-y-2">
-        <p className="text-xs font-medium text-muted-foreground mb-2">Rangliste</p>
-        {attendance.filter(a => a.sessions > 0).sort((a, b) => b.sessions - a.sessions).map(record => (
-          <div key={record.name} className="flex items-center justify-between text-sm py-1 px-2 rounded-lg bg-background/50">
-            <span>{record.name} <span className="text-muted-foreground text-xs">({record.sessions}x)</span></span>
-            <button
-              onClick={() => handleRemoveAttendee(record.name)}
-              className="text-xs text-muted-foreground hover:text-destructive transition-colors"
-            >
-              Entfernen
-            </button>
+      {activeTab === 'teilnehmer' && (
+        <div className="mb-4 space-y-2">
+          <p className="text-xs font-medium text-muted-foreground mb-3">Max. Teilnehmer</p>
+          <div className="flex items-center gap-2">
+            <Home className="w-4 h-4 text-muted-foreground shrink-0" />
+            <span className="text-sm w-16">Drinnen</span>
+            <Input type="number" min={1} value={indoorMax} onChange={(e) => setIndoorMax(e.target.value)} className="w-20 h-8 text-sm" />
           </div>
-        ))}
-        {attendance.filter(a => a.sessions > 0).length === 0 && (
-          <p className="text-xs text-muted-foreground">Keine Einträge</p>
-        )}
-        <Button variant="destructive" size="sm" onClick={handleResetLeaderboard} className="w-full mt-2">
-          Alle zurücksetzen
-        </Button>
-      </div>
+          <div className="flex items-center gap-2">
+            <Trees className="w-4 h-4 text-muted-foreground shrink-0" />
+            <span className="text-sm w-16">Draußen</span>
+            <Input type="number" min={1} value={outdoorMax} onChange={(e) => setOutdoorMax(e.target.value)} className="w-20 h-8 text-sm" />
+          </div>
+          <Button size="sm" onClick={handleSaveCapacity} className="w-full mt-1">Speichern</Button>
+        </div>
+      )}
+
+      {activeTab === 'rangliste' && (
+        <div className="mb-4 space-y-2">
+          {attendance.filter(a => a.sessions > 0).sort((a, b) => b.sessions - a.sessions).map(record => (
+            <div key={record.name} className="flex items-center justify-between text-sm py-1.5 px-2 rounded-lg bg-background/50">
+              <span>{record.name} <span className="text-muted-foreground text-xs">({record.sessions}x)</span></span>
+              <button
+                onClick={() => handleRemoveAttendee(record.name)}
+                className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+              >
+                Entfernen
+              </button>
+            </div>
+          ))}
+          {attendance.filter(a => a.sessions > 0).length === 0 && (
+            <p className="text-xs text-muted-foreground">Keine Einträge</p>
+          )}
+          <Button variant="destructive" size="sm" onClick={handleResetLeaderboard} className="w-full mt-2">
+            Alle zurücksetzen
+          </Button>
+        </div>
+      )}
 
       {/* Session list */}
       <ul className="space-y-2">
