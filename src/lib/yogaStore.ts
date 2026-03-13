@@ -1,4 +1,4 @@
-import { ref, get, set } from 'firebase/database';
+import { ref, get, set, onValue } from 'firebase/database';
 import { db } from './firebase';
 
 export type LocationType = 'indoor' | 'outdoor';
@@ -198,6 +198,26 @@ export const removeAttendee = async (name: string): Promise<void> => {
   const attendance = await getAttendance();
   const updated = attendance.filter(a => a.name !== name);
   await saveAttendance(updated);
+};
+
+export const subscribeToSessions = (callback: (sessions: YogaSession[]) => void): (() => void) => {
+  return onValue(ref(db, 'sessions'), (snapshot) => {
+    let sessions: YogaSession[] = [];
+    if (snapshot.exists()) {
+      sessions = (snapshot.val() as YogaSession[]).map(s => ({ ...s, attendees: s.attendees ?? [] }));
+    } else {
+      const initial = generateInitialSessions();
+      set(ref(db, 'sessions'), initial);
+      sessions = initial;
+    }
+    callback(sessions);
+  });
+};
+
+export const subscribeToAttendance = (callback: (attendance: AttendanceRecord[]) => void): (() => void) => {
+  return onValue(ref(db, 'attendance'), (snapshot) => {
+    callback(snapshot.exists() ? snapshot.val() : []);
+  });
 };
 
 export const formatDate = (dateString: string): string => {

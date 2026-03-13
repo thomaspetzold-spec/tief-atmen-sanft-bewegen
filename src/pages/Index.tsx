@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Leaf, Calendar, Users, Settings } from 'lucide-react';
-import { getSessions, getAttendance, YogaSession, AttendanceRecord } from '@/lib/yogaStore';
+import { subscribeToSessions, subscribeToAttendance, YogaSession, AttendanceRecord } from '@/lib/yogaStore';
 import { SessionCard } from '@/components/SessionCard';
 import { Leaderboard } from '@/components/Leaderboard';
 import { AdminPanel } from '@/components/AdminPanel';
@@ -12,14 +12,15 @@ const Index = () => {
   const [showAdmin, setShowAdmin] = useState(false);
   const [adminClosing, setAdminClosing] = useState(false);
 
-  const loadData = async () => {
-    const [s, a] = await Promise.all([getSessions(), getAttendance()]);
-    setSessions(s);
-    setAttendance(a);
-  };
+  const loadData = () => {};
 
   useEffect(() => {
-    loadData();
+    const unsubSessions = subscribeToSessions(setSessions);
+    const unsubAttendance = subscribeToAttendance(setAttendance);
+    return () => {
+      unsubSessions();
+      unsubAttendance();
+    };
   }, []);
 
   const closeAdmin = () => {
