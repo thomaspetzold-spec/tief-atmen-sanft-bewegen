@@ -34,19 +34,21 @@ export const SessionCard = ({ session, onUpdate, isPlaceholder = false }: Sessio
         <div className="flex justify-between items-start">
           <div>
             <h3 className="font-display text-xl font-semibold text-foreground">{formatDate(session.date)}</h3>
-            <div className="flex items-center gap-1.5 text-muted-foreground mt-1">
-              <Clock className="w-4 h-4" />
-              <span className="text-sm">{formatTime(session.time)}</span>
+            <div className="flex items-center gap-2 text-muted-foreground mt-1 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-4 h-4" />
+                <span className="text-sm">{formatTime(session.time)}</span>
+              </div>
+              <span className="text-muted-foreground/40">·</span>
+              <div className="flex items-center gap-1.5">
+                <LocationIcon className="w-4 h-4" />
+                <span className="text-sm">{getLocationLabel(session.locationType)}</span>
+              </div>
             </div>
           </div>
           <span className="slot-badge bg-muted text-muted-foreground text-xs">
             Teilnahme ab {getSignupOpenDate(session.date)} möglich
           </span>
-        </div>
-        <div className="flex items-center gap-1.5 text-muted-foreground mt-3">
-          <LocationIcon className="w-4 h-4" />
-          <span className="text-sm">{getLocationLabel(session.locationType)}</span>
-          <span className="text-xs">({session.maxSpots} Plätze)</span>
         </div>
       </div>
     );
@@ -84,20 +86,22 @@ export const SessionCard = ({ session, onUpdate, isPlaceholder = false }: Sessio
       <div className="flex justify-between items-start mb-3">
         <div>
           <h3 className="font-display text-xl font-semibold text-foreground">{formatDate(session.date)}</h3>
-          <div className="flex items-center gap-1.5 text-muted-foreground mt-1">
-            <Clock className="w-4 h-4" />
-            <span className="text-sm">{formatTime(session.time)}</span>
+          <div className="flex items-center gap-2 text-muted-foreground mt-1 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-4 h-4" />
+              <span className="text-sm">{formatTime(session.time)}</span>
+            </div>
+            <span className="text-muted-foreground/40">·</span>
+            <div className="flex items-center gap-1.5">
+              <LocationIcon className="w-4 h-4" />
+              <span className="text-sm font-medium">{getLocationLabel(session.locationType)}</span>
+            </div>
           </div>
         </div>
         <span className={`slot-badge ${isFull ? 'slot-full' : isLimited ? 'slot-limited' : 'slot-available'}`}>
           <Users className="w-3.5 h-3.5" />
           {isFull ? 'Voll' : `${spotsLeft} Plätze`}
         </span>
-      </div>
-
-      <div className="flex items-center gap-1.5 text-muted-foreground mb-4">
-        <LocationIcon className="w-4 h-4" />
-        <span className="text-sm font-medium">{getLocationLabel(session.locationType)}</span>
       </div>
 
       {!isFull && (
