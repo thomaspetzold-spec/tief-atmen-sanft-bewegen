@@ -60,7 +60,7 @@ const Index = () => {
           <Leaf className="w-8 h-8 text-primary" />
         </div>
         <h1 className="font-display text-4xl font-semibold text-foreground">
-          Yoga mit Anni
+          Tief atmen – sanft bewegen
         </h1>
       </header>
 
