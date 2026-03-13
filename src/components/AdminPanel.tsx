@@ -141,7 +141,7 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
         ))}
       </div>
 
-      {activeTab === 'teilnehmer' && (
+      {activeTab === 'teilnehmer' && (<>
         <div className="mb-4 space-y-2">
           <p className="text-xs font-medium text-muted-foreground mb-3">Max. Teilnehmer</p>
           <div className="flex items-center gap-2">
@@ -156,7 +156,65 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
           </div>
           <Button size="sm" onClick={handleSaveCapacity} className="w-full mt-1">Speichern</Button>
         </div>
-      )}
+
+        {/* Session list */}
+        <ul className="space-y-2">
+          {sessions.map((session) => (
+            <li key={session.id} className="rounded-xl bg-background/50 overflow-hidden">
+              <div className="flex items-center justify-between py-2.5 px-3">
+                <button
+                  onClick={() => toggleSession(session.id)}
+                  className="flex items-center gap-1.5 text-left flex-1 min-w-0"
+                >
+                  {expandedSessions.has(session.id) ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
+                  <div>
+                    <span className="font-medium">{formatDate(session.date)}</span>
+                    <span className="text-sm text-muted-foreground ml-2">{formatTime(session.time)}</span>
+                    <div className="text-xs text-muted-foreground">{session.attendees.length}/{session.maxSpots} angemeldet</div>
+                  </div>
+                </button>
+                <div className="flex items-center bg-muted rounded-lg p-0.5 text-xs font-medium ml-2 shrink-0">
+                  <button
+                    onClick={() => session.locationType !== 'indoor' && handleToggleLocation(session)}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md transition-all ${
+                      session.locationType === 'indoor' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Home className="w-3.5 h-3.5" />
+                    Drinnen
+                  </button>
+                  <button
+                    onClick={() => session.locationType !== 'outdoor' && handleToggleLocation(session)}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md transition-all ${
+                      session.locationType === 'outdoor' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Trees className="w-3.5 h-3.5" />
+                    Draußen
+                  </button>
+                </div>
+              </div>
+              {expandedSessions.has(session.id) && (
+                <ul className="border-t border-border/50 px-3 py-2 space-y-1.5">
+                  {session.attendees.length === 0 ? (
+                    <li className="text-xs text-muted-foreground py-1">Keine Anmeldungen</li>
+                  ) : session.attendees.map((name) => (
+                    <li key={name} className="flex items-center justify-between text-sm py-1 px-2 rounded-lg bg-muted/50">
+                      <span>{name}</span>
+                      <button
+                        onClick={() => handleRemoveFromSession(session.id, name)}
+                        className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        Entfernen
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      </>)}
 
       {activeTab === 'rangliste' && (
         <div className="mb-4 space-y-2">
@@ -180,63 +238,6 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
         </div>
       )}
 
-      {/* Session list */}
-      <ul className="space-y-2">
-        {sessions.map((session) => (
-          <li key={session.id} className="rounded-xl bg-background/50 overflow-hidden">
-            <div className="flex items-center justify-between py-2.5 px-3">
-              <button
-                onClick={() => toggleSession(session.id)}
-                className="flex items-center gap-1.5 text-left flex-1 min-w-0"
-              >
-                {expandedSessions.has(session.id) ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
-                <div>
-                  <span className="font-medium">{formatDate(session.date)}</span>
-                  <span className="text-sm text-muted-foreground ml-2">{formatTime(session.time)}</span>
-                  <div className="text-xs text-muted-foreground">{session.attendees.length}/{session.maxSpots} angemeldet</div>
-                </div>
-              </button>
-              <div className="flex items-center bg-muted rounded-lg p-0.5 text-xs font-medium ml-2 shrink-0">
-                <button
-                  onClick={() => session.locationType !== 'indoor' && handleToggleLocation(session)}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md transition-all ${
-                    session.locationType === 'indoor' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Home className="w-3.5 h-3.5" />
-                  Drinnen
-                </button>
-                <button
-                  onClick={() => session.locationType !== 'outdoor' && handleToggleLocation(session)}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md transition-all ${
-                    session.locationType === 'outdoor' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Trees className="w-3.5 h-3.5" />
-                  Draußen
-                </button>
-              </div>
-            </div>
-            {expandedSessions.has(session.id) && (
-              <ul className="border-t border-border/50 px-3 py-2 space-y-1.5">
-                {session.attendees.length === 0 ? (
-                  <li className="text-xs text-muted-foreground py-1">Keine Anmeldungen</li>
-                ) : session.attendees.map((name) => (
-                  <li key={name} className="flex items-center justify-between text-sm py-1 px-2 rounded-lg bg-muted/50">
-                    <span>{name}</span>
-                    <button
-                      onClick={() => handleRemoveFromSession(session.id, name)}
-                      className="text-xs text-muted-foreground hover:text-destructive transition-colors"
-                    >
-                      Entfernen
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ul>
     </div>
   );
 };
