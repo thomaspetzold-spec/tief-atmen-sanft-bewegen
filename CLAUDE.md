@@ -40,7 +40,7 @@ AttendanceRecord { name, sessions }
 ## Features
 - Sessions automatisch generiert: jeden Dienstag 18:00 Uhr, 4 Wochen voraus
 - Diese Woche: buchbar; Demnächst: nur Vorschau
-- Anmeldung öffnet 4 Tage vor dem Termin
+- Anmeldung öffnet 14 Tage (2 Wochen) vor dem Termin
 - Admin-PIN: `1210`
 
 ## npm Problem

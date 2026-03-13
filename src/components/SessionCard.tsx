@@ -24,7 +24,7 @@ export const SessionCard = ({ session, onUpdate, isPlaceholder = false }: Sessio
 
   const getSignupOpenDate = (dateString: string): string => {
     const eventDate = new Date(dateString);
-    eventDate.setDate(eventDate.getDate() - 4);
+    eventDate.setDate(eventDate.getDate() - 7);
     return eventDate.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
   };
 

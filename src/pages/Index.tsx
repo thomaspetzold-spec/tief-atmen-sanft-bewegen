@@ -30,14 +30,6 @@ const Index = () => {
     }, 350);
   };
 
-  const getEndOfWeek = (date: Date) => {
-    const end = new Date(date);
-    const diff = 7 - end.getDay();
-    end.setDate(end.getDate() + diff);
-    end.setHours(23, 59, 59, 999);
-    return end;
-  };
-
   const upcomingSessions = sessions.filter(s => {
     const sessionDate = new Date(s.date);
     const today = new Date();
@@ -45,10 +37,12 @@ const Index = () => {
     return sessionDate >= today;
   });
 
-  const endOfWeek = getEndOfWeek(new Date());
+  const signupCutoff = new Date();
+  signupCutoff.setDate(signupCutoff.getDate() + 7);
+  signupCutoff.setHours(23, 59, 59, 999);
 
-  const thisWeekSessions = upcomingSessions.filter(s => new Date(s.date) <= endOfWeek);
-  const futureSessions = upcomingSessions.filter(s => new Date(s.date) > endOfWeek);
+  const thisWeekSessions = upcomingSessions.filter(s => new Date(s.date) <= signupCutoff);
+  const futureSessions = upcomingSessions.filter(s => new Date(s.date) > signupCutoff);
 
   return (
     <div className="min-h-screen gradient-hero">
@@ -131,7 +125,7 @@ const Index = () => {
                 {thisWeekSessions.length > 0 && (
                   <div className="space-y-4">
                     <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide px-1 animate-fade-in">
-                      Diese Woche
+                      Jetzt buchbar
                     </h2>
                     {thisWeekSessions.map((session, i) => (
                       <div key={session.id} className="animate-fade-in" style={{ animationDelay: `${i * 0.08}s` }}>

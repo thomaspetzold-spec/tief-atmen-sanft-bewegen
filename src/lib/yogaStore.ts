@@ -173,6 +173,10 @@ export const cancelCheckIn = async (sessionId: string, name: string): Promise<{ 
   return { success: true, message: 'Dein Platz wurde freigegeben' };
 };
 
+export const resetAttendance = async (): Promise<void> => {
+  await set(ref(db, 'attendance'), []);
+};
+
 export const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
   return date.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' });

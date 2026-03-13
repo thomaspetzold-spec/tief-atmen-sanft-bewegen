@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Settings, Home, Trees } from 'lucide-react';
-import { YogaSession, formatDate, formatTime, updateSessionLocation, getLocationLabel, LocationType, getCapacity, saveCapacity } from '@/lib/yogaStore';
+import { YogaSession, formatDate, formatTime, updateSessionLocation, getLocationLabel, LocationType, getCapacity, saveCapacity, resetAttendance } from '@/lib/yogaStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -28,6 +28,13 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
     await updateSessionLocation(session.id, newType);
     onUpdate();
     toast({ title: 'Ort geändert', description: `${formatDate(session.date)} ist jetzt ${getLocationLabel(newType)}` });
+  };
+
+  const handleResetLeaderboard = async () => {
+    if (!confirm('Rangliste wirklich zurücksetzen? Das kann nicht rückgängig gemacht werden.')) return;
+    await resetAttendance();
+    onUpdate();
+    toast({ title: 'Rangliste zurückgesetzt', description: 'Alle Teilnahmen wurden gelöscht' });
   };
 
   const handleSaveCapacity = async () => {
@@ -64,6 +71,13 @@ export const AdminPanel = ({ sessions, onUpdate, onClose }: AdminPanelProps) => 
           <Input type="number" min={1} value={outdoorMax} onChange={(e) => setOutdoorMax(e.target.value)} className="w-20 h-8 text-sm" />
         </div>
         <Button size="sm" onClick={handleSaveCapacity} className="w-full mt-1">Speichern</Button>
+      </div>
+
+      {/* Reset leaderboard */}
+      <div className="mb-4">
+        <Button variant="destructive" size="sm" onClick={handleResetLeaderboard} className="w-full">
+          Rangliste zurücksetzen
+        </Button>
       </div>
 
       {/* Session list */}
